@@ -46,7 +46,7 @@ model Doctor {
   licenseNumber String
 
   consultations Consultation[]
-}
+} 
 
 model Patient {
   id String   @id
