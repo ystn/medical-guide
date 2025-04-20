@@ -4,6 +4,31 @@ A comprehensive medical management system built with Next.js, Prisma, and Postgr
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## Screenshots
+
+Here's a preview of the Medical Guide interface:
+
+### Dashboard
+
+![Dashboard](./screenshots/Dashboard.png)
+
+### Patient Management
+
+![Patients List](./screenshots/Patients.png)
+![Patient Details](./screenshots/Patient_Details.png)
+
+### Consultation
+
+![Consultation Interface](./screenshots/Consultation.png)
+
+### User Profile
+
+![Profile Management](./screenshots/Profile.png)
+
+### Help Center
+
+![Help Center](./screenshots/Help_Center.png)
+
 ## Features
 
 - **User Authentication**: Secure login and registration system for doctors and patients
