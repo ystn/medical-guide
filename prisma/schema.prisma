@@ -47,7 +47,7 @@ model Doctor {
 
   patients Patient[]
   consultations Consultation[]
-}
+} 
 
 enum Gender {
   male
