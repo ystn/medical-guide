@@ -2,6 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -327,7 +329,15 @@ const getColumns = ({
 ];
 
 export default function PatientsTable() {
-  const { patients, updatePatient, removePatient } = useMockData();
+  const {
+    patients,
+    updatePatient,
+    removePatient,
+    medicaments,
+    addPrescription,
+    getPatientPrescriptions,
+  } = useMockData();
+  const router = useRouter();
   const id = useId();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -338,8 +348,40 @@ export default function PatientsTable() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [showPatientDialog, setShowPatientDialog] = useState(false);
+  const [showPrescriptionDialog, setShowPrescriptionDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [isUpdatePending, startUpdateTransition] = useTransition();
+
+  // State for prescription creation
+  const [newPrescription, setNewPrescription] = useState<{
+    medicamentId: string;
+    dosage: number;
+    duration: string;
+    morning: boolean;
+    afternoon: boolean;
+    evening: boolean;
+    night: boolean;
+    foodOrder: "before" | "after" | "with" | "none";
+  }>({
+    medicamentId: "",
+    dosage: 1,
+    duration: "7 days",
+    morning: true,
+    afternoon: false,
+    evening: false,
+    night: false,
+    foodOrder: "after",
+  });
+
+  const [patientPrescriptions, setPatientPrescriptions] = useState<any[]>([]);
+
+  // Load patient prescriptions when patient changes
+  useEffect(() => {
+    if (selectedPatient) {
+      const prescriptions = getPatientPrescriptions(selectedPatient.id);
+      setPatientPrescriptions(prescriptions);
+    }
+  }, [selectedPatient, getPatientPrescriptions]);
 
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -351,6 +393,67 @@ export default function PatientsTable() {
   const openPatientDetails = (patient: Patient) => {
     setSelectedPatient(patient);
     setShowPatientDialog(true);
+  };
+
+  const handleCreatePrescription = () => {
+    if (!selectedPatient || !newPrescription.medicamentId) return;
+
+    // Find the medicament name
+    const selectedMedicament = medicaments.find(
+      (med) => med.id === newPrescription.medicamentId
+    );
+    if (!selectedMedicament) return;
+
+    // Create a prescription line
+    const prescriptionLine = {
+      id: `PRESC-LINE-${Math.random().toString(36).substr(2, 9)}`,
+      prescriptionId: "",
+      medicamentId: newPrescription.medicamentId,
+      medicamentName: selectedMedicament.name,
+      dosage: newPrescription.dosage,
+      duration: newPrescription.duration,
+      morning: newPrescription.morning,
+      afternoon: newPrescription.afternoon,
+      evening: newPrescription.evening,
+      night: newPrescription.night,
+      foodOrder: newPrescription.foodOrder,
+    };
+
+    // Create a prescription
+    const prescription = {
+      id: `PRESC-${Math.random().toString(36).substr(2, 9)}`,
+      doctorId: "DR-001", // Mock doctor ID
+      doctorName: "Dr. Williams", // Mock doctor name
+      patientId: selectedPatient.id,
+      patientName: selectedPatient.name,
+      date: new Date().toISOString().split("T")[0],
+      dosage: "As directed",
+      duration: newPrescription.duration,
+      consultationId: "",
+      lines: [prescriptionLine],
+    };
+
+    // Update the prescription line's prescriptionId
+    prescription.lines[0].prescriptionId = prescription.id;
+
+    // Add the prescription to the mock data
+    addPrescription(prescription);
+
+    // Update local state
+    setPatientPrescriptions([...patientPrescriptions, prescription]);
+
+    // Reset form and close dialog
+    setNewPrescription({
+      medicamentId: "",
+      dosage: 1,
+      duration: "7 days",
+      morning: true,
+      afternoon: false,
+      evening: false,
+      night: false,
+      foodOrder: "after",
+    });
+    setShowPrescriptionDialog(false);
   };
 
   const handleDeleteRows = () => {
@@ -1033,7 +1136,16 @@ export default function PatientsTable() {
                         <p>
                           View patient consultations in the Consultations tab
                         </p>
-                        <Button className="mt-4">Go to Consultations</Button>
+                        <Button
+                          className="mt-4"
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/consultation?patientId=${selectedPatient.id}`
+                            )
+                          }
+                        >
+                          Go to Consultations
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1045,10 +1157,66 @@ export default function PatientsTable() {
                       <CardTitle>Prescriptions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="text-center text-muted-foreground py-8">
-                        <p>No prescriptions available for this patient</p>
-                        <Button className="mt-4">Create Prescription</Button>
-                      </div>
+                      {patientPrescriptions.length > 0 ? (
+                        <div className="space-y-4">
+                          {patientPrescriptions.map((prescription) => (
+                            <div
+                              key={prescription.id}
+                              className="border p-3 rounded-md"
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-medium">
+                                  {prescription.date}
+                                </h3>
+                                <Badge variant="outline">
+                                  {prescription.duration}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                {prescription.lines.map((line: any) => (
+                                  <div
+                                    key={line.id}
+                                    className="bg-accent/40 p-2 rounded flex justify-between items-center"
+                                  >
+                                    <div>
+                                      <p className="font-medium">
+                                        {line.medicamentName}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {line.dosage} {line.morning && "AM"}{" "}
+                                        {line.afternoon && "Noon"}{" "}
+                                        {line.evening && "PM"}{" "}
+                                        {line.night && "Night"} -{" "}
+                                        {line.foodOrder} food
+                                      </p>
+                                    </div>
+                                    <Badge>{line.duration}</Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted-foreground py-8">
+                          <p>No prescriptions available for this patient</p>
+                          <Button
+                            className="mt-4"
+                            onClick={() => setShowPrescriptionDialog(true)}
+                          >
+                            Create Prescription
+                          </Button>
+                        </div>
+                      )}
+
+                      {patientPrescriptions.length > 0 && (
+                        <Button
+                          className="w-full"
+                          onClick={() => setShowPrescriptionDialog(true)}
+                        >
+                          Create New Prescription
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -1067,6 +1235,169 @@ export default function PatientsTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Prescription Creation Dialog */}
+      {selectedPatient && (
+        <Dialog
+          open={showPrescriptionDialog}
+          onOpenChange={setShowPrescriptionDialog}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Prescription</DialogTitle>
+              <DialogDescription>
+                Create a new prescription for {selectedPatient?.name}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="medicament">Medication</Label>
+                <select
+                  id="medicament"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newPrescription.medicamentId}
+                  onChange={(e) =>
+                    setNewPrescription({
+                      ...newPrescription,
+                      medicamentId: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">Select a medication</option>
+                  {medicaments.map((med) => (
+                    <option key={med.id} value={med.id}>
+                      {med.name} - {med.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dosage">Dosage</Label>
+                  <Input
+                    id="dosage"
+                    type="number"
+                    min="1"
+                    value={newPrescription.dosage}
+                    onChange={(e) =>
+                      setNewPrescription({
+                        ...newPrescription,
+                        dosage: parseInt(e.target.value, 10),
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration</Label>
+                  <Input
+                    id="duration"
+                    value={newPrescription.duration}
+                    onChange={(e) =>
+                      setNewPrescription({
+                        ...newPrescription,
+                        duration: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Time of day</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="morning"
+                      checked={newPrescription.morning}
+                      onCheckedChange={(checked) =>
+                        setNewPrescription({
+                          ...newPrescription,
+                          morning: checked === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor="morning">Morning</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="afternoon"
+                      checked={newPrescription.afternoon}
+                      onCheckedChange={(checked) =>
+                        setNewPrescription({
+                          ...newPrescription,
+                          afternoon: checked === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor="afternoon">Afternoon</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="evening"
+                      checked={newPrescription.evening}
+                      onCheckedChange={(checked) =>
+                        setNewPrescription({
+                          ...newPrescription,
+                          evening: checked === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor="evening">Evening</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="night"
+                      checked={newPrescription.night}
+                      onCheckedChange={(checked) =>
+                        setNewPrescription({
+                          ...newPrescription,
+                          night: checked === true,
+                        })
+                      }
+                    />
+                    <Label htmlFor="night">Night</Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="foodOrder">Food Relation</Label>
+                <select
+                  id="foodOrder"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newPrescription.foodOrder}
+                  onChange={(e) =>
+                    setNewPrescription({
+                      ...newPrescription,
+                      foodOrder: e.target.value as any,
+                    })
+                  }
+                >
+                  <option value="before">Before food</option>
+                  <option value="with">With food</option>
+                  <option value="after">After food</option>
+                  <option value="none">No food relation</option>
+                </select>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowPrescriptionDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleCreatePrescription}>
+                Save Prescription
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

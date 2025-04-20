@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useMemo } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -25,6 +25,7 @@ import {
   RiCalendarCheckLine,
   RiPulseLine,
   RiFileListLine,
+  RiArrowLeftLine,
 } from "@remixicon/react";
 import {
   Card,
@@ -58,9 +59,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function ConsultationPage() {
   const { patients, consultations, addConsultation } = useMockData();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [symptoms, setSymptoms] = useState("");
   const [activeTab, setActiveTab] = useState("new");
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -69,6 +73,30 @@ export default function ConsultationPage() {
   const [showConsultationDialog, setShowConsultationDialog] = useState(false);
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
+  const [filteredConsultations, setFilteredConsultations] = useState<
+    Consultation[]
+  >([]);
+  const [isFiltered, setIsFiltered] = useState(false);
+
+  // Check for patientId query parameter
+  useEffect(() => {
+    const patientId = searchParams.get("patientId");
+    if (patientId) {
+      setSelectedPatientId(patientId);
+      setActiveTab("recent");
+
+      // Filter consultations for this patient
+      const patientConsultations = consultations.filter(
+        (consultation) => consultation.patientId === patientId
+      );
+      setFilteredConsultations(patientConsultations);
+      setIsFiltered(true);
+    } else {
+      // If no patient ID, show all consultations
+      setFilteredConsultations([]);
+      setIsFiltered(false);
+    }
+  }, [searchParams, consultations]);
 
   // Reset AI response when patient changes
   useEffect(() => {
@@ -202,9 +230,22 @@ export default function ConsultationPage() {
   const totalConsultations = consultations.length;
 
   // Sort consultations by date (newest first)
-  const recentConsultations = [...consultations]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  const recentConsultations = useMemo(() => {
+    const consultationsToShow = isFiltered
+      ? filteredConsultations
+      : consultations;
+    return [...consultationsToShow]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  }, [isFiltered, filteredConsultations, consultations]);
+
+  // Clear filters function
+  const clearFilters = () => {
+    router.push("/dashboard/consultation");
+    setIsFiltered(false);
+    setFilteredConsultations([]);
+    setSelectedPatientId("");
+  };
 
   return (
     <SidebarProvider>
@@ -244,9 +285,29 @@ export default function ConsultationPage() {
               <h1 className="text-2xl font-semibold">
                 AI Medical Consultation
               </h1>
-              <p className="text-sm text-muted-foreground">
-                Get AI-powered insights for your medical questions and diagnoses
-              </p>
+              {isFiltered && selectedPatientId && (
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    Showing consultations for patient:{" "}
+                    {patients.find((p) => p.id === selectedPatientId)?.name}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1"
+                    onClick={clearFilters}
+                  >
+                    <RiArrowLeftLine size={14} />
+                    Clear filter
+                  </Button>
+                </div>
+              )}
+              {!isFiltered && (
+                <p className="text-sm text-muted-foreground">
+                  Get AI-powered insights for your medical questions and
+                  diagnoses
+                </p>
+              )}
             </div>
             <Button
               className="px-3"
@@ -254,7 +315,10 @@ export default function ConsultationPage() {
                 setActiveTab("new");
                 setSymptoms("");
                 setAiResponse("");
-                setSelectedPatientId("");
+                // If we're filtering by patient, keep the selected patient
+                if (!isFiltered) {
+                  setSelectedPatientId("");
+                }
               }}
             >
               Start New Consultation
@@ -320,7 +384,9 @@ export default function ConsultationPage() {
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="new">New Consultation</TabsTrigger>
-              <TabsTrigger value="recent">Recent Consultations</TabsTrigger>
+              <TabsTrigger value="recent">
+                {isFiltered ? "Patient Consultations" : "Recent Consultations"}
+              </TabsTrigger>
             </TabsList>
             <div className="mt-4">
               <TabsContent value="new">
@@ -447,9 +513,15 @@ export default function ConsultationPage() {
                   <div className="grid gap-4 md:grid-cols-1">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Recent Consultations</CardTitle>
+                        <CardTitle>
+                          {isFiltered
+                            ? "Patient Consultations"
+                            : "Recent Consultations"}
+                        </CardTitle>
                         <CardDescription>
-                          Click on a consultation to view details
+                          {isFiltered
+                            ? "All consultations for the selected patient"
+                            : "Click on a consultation to view details"}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -506,11 +578,13 @@ export default function ConsultationPage() {
                             ))
                           ) : (
                             <div className="text-center py-4 text-muted-foreground">
-                              No consultations found.
+                              {isFiltered
+                                ? "No consultations found for this patient."
+                                : "No consultations found."}
                             </div>
                           )}
 
-                          {consultations.length > 5 && (
+                          {!isFiltered && consultations.length > 5 && (
                             <Button variant="outline" className="w-full">
                               View All Consultations
                             </Button>
