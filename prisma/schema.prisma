@@ -45,14 +45,22 @@ model Doctor {
   specialty String
   licenseNumber String
 
+  patients Patient[]
   consultations Consultation[]
+}
+
+enum Gender {
+  male
+  female
 }
 
 model Patient {
   id String   @id
   user User? @relation(fields: [id], references: [id])
-  birthDate DateTime
+  birthdate DateTime
+  gender Gender
 
+  doctors Doctor[]
   consultations Consultation[]
 }
 

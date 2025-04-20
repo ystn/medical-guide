@@ -136,7 +136,8 @@ exports.Prisma.DoctorScalarFieldEnum = {
 
 exports.Prisma.PatientScalarFieldEnum = {
   id: 'id',
-  birthDate: 'birthDate'
+  birthdate: 'birthdate',
+  gender: 'gender'
 };
 
 exports.Prisma.MedicamentScalarFieldEnum = {
@@ -210,6 +211,11 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.Gender = exports.$Enums.Gender = {
+  male: 'male',
+  female: 'female'
+};
+
 exports.Unit = exports.$Enums.Unit = {
   mg: 'mg',
   g: 'g',
