@@ -36,7 +36,7 @@ A comprehensive medical management system built with Next.js, Prisma, and Postgr
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/medical-guide.git
+git clone https://github.com/ystne/medical-guide.git
 cd medical-guide
 ```
 
