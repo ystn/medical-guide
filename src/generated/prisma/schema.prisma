@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Unit {
+  mg
+  g
+  ml
+  l
+  unit
+  tablet
+  capsule
+  sachet
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  doctor  Doctor?
+  patient Patient?
+}
+
+model Doctor {
+  id            String @id
+  user          User?  @relation(fields: [id], references: [id])
+  specialty     String
+  licenseNumber String
+
+  consultations Consultation[]
+}
+
+model Patient {
+  id        String   @id
+  user      User?    @relation(fields: [id], references: [id])
+  birthDate DateTime
+
+  consultations Consultation[]
+}
+
+model Medicament {
+  id                String   @id @default(cuid())
+  code              String
+  name              String
+  description       String
+  sideEffects       String[]
+  contraindications String[]
+  interactions      String[]
+  quantityPerPack   Int
+  unit              Unit
+
+  prescriptions     Prescription[]
+  prescriptionLines PrescriptionLine[]
+}
+
+model Prescription {
+  id             String        @id @default(cuid())
+  doctorId       String
+  patientId      String
+  date           DateTime
+  medicaments    Medicament[]
+  dosage         String
+  duration       String
+  consultationId String?
+  consultation   Consultation? @relation(fields: [consultationId], references: [id])
+
+  prescriptionLines PrescriptionLine[]
+}
+
+enum FoodOrderType {
+  before
+  after
+  with
+  none
+}
+
+model PrescriptionLine {
+  id             String        @id @default(cuid())
+  prescriptionId String
+  medicamentId   String
+  dosage         Int
+  duration       String
+  morning        Boolean
+  afternoon      Boolean
+  evening        Boolean
+  night          Boolean
+  foodOrder      FoodOrderType
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  medicament   Medicament   @relation(fields: [medicamentId], references: [id])
+
+  reminders ReminderData[]
+}
+
+model Consultation {
+  id           String         @id @default(cuid())
+  doctorId     String
+  patientId    String
+  date         DateTime
+  symptoms     String[]
+  diseases     String[]
+  prescription Prescription[]
+
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+}
+
+model Reminder {
+  id   String   @id @default(cuid())
+  date DateTime
+  time DateTime
+
+  reminderData ReminderData[]
+}
+
+model ReminderData {
+  id                 String  @id @default(cuid())
+  reminderId         String
+  prescriptionLineId String
+  taken              Boolean
+
+  reminder         Reminder         @relation(fields: [reminderId], references: [id])
+  prescriptionLine PrescriptionLine @relation(fields: [prescriptionLineId], references: [id])
+}
