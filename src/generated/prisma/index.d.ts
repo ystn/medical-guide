@@ -77,6 +77,14 @@ export namespace $Enums {
 export type Unit = (typeof Unit)[keyof typeof Unit]
 
 
+export const Gender: {
+  male: 'male',
+  female: 'female'
+};
+
+export type Gender = (typeof Gender)[keyof typeof Gender]
+
+
 export const FoodOrderType: {
   before: 'before',
   after: 'after',
@@ -91,6 +99,10 @@ export type FoodOrderType = (typeof FoodOrderType)[keyof typeof FoodOrderType]
 export type Unit = $Enums.Unit
 
 export const Unit: typeof $Enums.Unit
+
+export type Gender = $Enums.Gender
+
+export const Gender: typeof $Enums.Gender
 
 export type FoodOrderType = $Enums.FoodOrderType
 
@@ -1634,10 +1646,12 @@ export namespace Prisma {
    */
 
   export type DoctorCountOutputType = {
+    patients: number
     consultations: number
   }
 
   export type DoctorCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    patients?: boolean | DoctorCountOutputTypeCountPatientsArgs
     consultations?: boolean | DoctorCountOutputTypeCountConsultationsArgs
   }
 
@@ -1655,6 +1669,13 @@ export namespace Prisma {
   /**
    * DoctorCountOutputType without action
    */
+  export type DoctorCountOutputTypeCountPatientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PatientWhereInput
+  }
+
+  /**
+   * DoctorCountOutputType without action
+   */
   export type DoctorCountOutputTypeCountConsultationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ConsultationWhereInput
   }
@@ -1665,10 +1686,12 @@ export namespace Prisma {
    */
 
   export type PatientCountOutputType = {
+    doctors: number
     consultations: number
   }
 
   export type PatientCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    doctors?: boolean | PatientCountOutputTypeCountDoctorsArgs
     consultations?: boolean | PatientCountOutputTypeCountConsultationsArgs
   }
 
@@ -1681,6 +1704,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the PatientCountOutputType
      */
     select?: PatientCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PatientCountOutputType without action
+   */
+  export type PatientCountOutputTypeCountDoctorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DoctorWhereInput
   }
 
   /**
@@ -3142,6 +3172,7 @@ export namespace Prisma {
     specialty?: boolean
     licenseNumber?: boolean
     user?: boolean | Doctor$userArgs<ExtArgs>
+    patients?: boolean | Doctor$patientsArgs<ExtArgs>
     consultations?: boolean | Doctor$consultationsArgs<ExtArgs>
     _count?: boolean | DoctorCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["doctor"]>
@@ -3169,6 +3200,7 @@ export namespace Prisma {
   export type DoctorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "specialty" | "licenseNumber", ExtArgs["result"]["doctor"]>
   export type DoctorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Doctor$userArgs<ExtArgs>
+    patients?: boolean | Doctor$patientsArgs<ExtArgs>
     consultations?: boolean | Doctor$consultationsArgs<ExtArgs>
     _count?: boolean | DoctorCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -3183,6 +3215,7 @@ export namespace Prisma {
     name: "Doctor"
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
+      patients: Prisma.$PatientPayload<ExtArgs>[]
       consultations: Prisma.$ConsultationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -3584,6 +3617,7 @@ export namespace Prisma {
   export interface Prisma__DoctorClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Doctor$userArgs<ExtArgs> = {}>(args?: Subset<T, Doctor$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    patients<T extends Doctor$patientsArgs<ExtArgs> = {}>(args?: Subset<T, Doctor$patientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PatientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     consultations<T extends Doctor$consultationsArgs<ExtArgs> = {}>(args?: Subset<T, Doctor$consultationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConsultationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4032,6 +4066,30 @@ export namespace Prisma {
   }
 
   /**
+   * Doctor.patients
+   */
+  export type Doctor$patientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Patient
+     */
+    select?: PatientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Patient
+     */
+    omit?: PatientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PatientInclude<ExtArgs> | null
+    where?: PatientWhereInput
+    orderBy?: PatientOrderByWithRelationInput | PatientOrderByWithRelationInput[]
+    cursor?: PatientWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PatientScalarFieldEnum | PatientScalarFieldEnum[]
+  }
+
+  /**
    * Doctor.consultations
    */
   export type Doctor$consultationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4086,34 +4144,40 @@ export namespace Prisma {
 
   export type PatientMinAggregateOutputType = {
     id: string | null
-    birthDate: Date | null
+    birthdate: Date | null
+    gender: $Enums.Gender | null
   }
 
   export type PatientMaxAggregateOutputType = {
     id: string | null
-    birthDate: Date | null
+    birthdate: Date | null
+    gender: $Enums.Gender | null
   }
 
   export type PatientCountAggregateOutputType = {
     id: number
-    birthDate: number
+    birthdate: number
+    gender: number
     _all: number
   }
 
 
   export type PatientMinAggregateInputType = {
     id?: true
-    birthDate?: true
+    birthdate?: true
+    gender?: true
   }
 
   export type PatientMaxAggregateInputType = {
     id?: true
-    birthDate?: true
+    birthdate?: true
+    gender?: true
   }
 
   export type PatientCountAggregateInputType = {
     id?: true
-    birthDate?: true
+    birthdate?: true
+    gender?: true
     _all?: true
   }
 
@@ -4191,7 +4255,8 @@ export namespace Prisma {
 
   export type PatientGroupByOutputType = {
     id: string
-    birthDate: Date
+    birthdate: Date
+    gender: $Enums.Gender
     _count: PatientCountAggregateOutputType | null
     _min: PatientMinAggregateOutputType | null
     _max: PatientMaxAggregateOutputType | null
@@ -4213,32 +4278,38 @@ export namespace Prisma {
 
   export type PatientSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    birthDate?: boolean
+    birthdate?: boolean
+    gender?: boolean
     user?: boolean | Patient$userArgs<ExtArgs>
+    doctors?: boolean | Patient$doctorsArgs<ExtArgs>
     consultations?: boolean | Patient$consultationsArgs<ExtArgs>
     _count?: boolean | PatientCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["patient"]>
 
   export type PatientSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    birthDate?: boolean
+    birthdate?: boolean
+    gender?: boolean
     user?: boolean | Patient$userArgs<ExtArgs>
   }, ExtArgs["result"]["patient"]>
 
   export type PatientSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    birthDate?: boolean
+    birthdate?: boolean
+    gender?: boolean
     user?: boolean | Patient$userArgs<ExtArgs>
   }, ExtArgs["result"]["patient"]>
 
   export type PatientSelectScalar = {
     id?: boolean
-    birthDate?: boolean
+    birthdate?: boolean
+    gender?: boolean
   }
 
-  export type PatientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "birthDate", ExtArgs["result"]["patient"]>
+  export type PatientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "birthdate" | "gender", ExtArgs["result"]["patient"]>
   export type PatientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Patient$userArgs<ExtArgs>
+    doctors?: boolean | Patient$doctorsArgs<ExtArgs>
     consultations?: boolean | Patient$consultationsArgs<ExtArgs>
     _count?: boolean | PatientCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -4253,11 +4324,13 @@ export namespace Prisma {
     name: "Patient"
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
+      doctors: Prisma.$DoctorPayload<ExtArgs>[]
       consultations: Prisma.$ConsultationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      birthDate: Date
+      birthdate: Date
+      gender: $Enums.Gender
     }, ExtArgs["result"]["patient"]>
     composites: {}
   }
@@ -4653,6 +4726,7 @@ export namespace Prisma {
   export interface Prisma__PatientClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Patient$userArgs<ExtArgs> = {}>(args?: Subset<T, Patient$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    doctors<T extends Patient$doctorsArgs<ExtArgs> = {}>(args?: Subset<T, Patient$doctorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DoctorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     consultations<T extends Patient$consultationsArgs<ExtArgs> = {}>(args?: Subset<T, Patient$consultationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConsultationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4684,7 +4758,8 @@ export namespace Prisma {
    */
   interface PatientFieldRefs {
     readonly id: FieldRef<"Patient", 'String'>
-    readonly birthDate: FieldRef<"Patient", 'DateTime'>
+    readonly birthdate: FieldRef<"Patient", 'DateTime'>
+    readonly gender: FieldRef<"Patient", 'Gender'>
   }
     
 
@@ -5097,6 +5172,30 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * Patient.doctors
+   */
+  export type Patient$doctorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Doctor
+     */
+    select?: DoctorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Doctor
+     */
+    omit?: DoctorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DoctorInclude<ExtArgs> | null
+    where?: DoctorWhereInput
+    orderBy?: DoctorOrderByWithRelationInput | DoctorOrderByWithRelationInput[]
+    cursor?: DoctorWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DoctorScalarFieldEnum | DoctorScalarFieldEnum[]
   }
 
   /**
@@ -11907,7 +12006,8 @@ export namespace Prisma {
 
   export const PatientScalarFieldEnum: {
     id: 'id',
-    birthDate: 'birthDate'
+    birthdate: 'birthdate',
+    gender: 'gender'
   };
 
   export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
@@ -12042,6 +12142,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Gender'
+   */
+  export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
+    
+
+
+  /**
+   * Reference to a field of type 'Gender[]'
+   */
+  export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
     
 
 
@@ -12192,6 +12306,7 @@ export namespace Prisma {
     specialty?: StringFilter<"Doctor"> | string
     licenseNumber?: StringFilter<"Doctor"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    patients?: PatientListRelationFilter
     consultations?: ConsultationListRelationFilter
   }
 
@@ -12200,6 +12315,7 @@ export namespace Prisma {
     specialty?: SortOrder
     licenseNumber?: SortOrder
     user?: UserOrderByWithRelationInput
+    patients?: PatientOrderByRelationAggregateInput
     consultations?: ConsultationOrderByRelationAggregateInput
   }
 
@@ -12211,6 +12327,7 @@ export namespace Prisma {
     specialty?: StringFilter<"Doctor"> | string
     licenseNumber?: StringFilter<"Doctor"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    patients?: PatientListRelationFilter
     consultations?: ConsultationListRelationFilter
   }, "id">
 
@@ -12237,15 +12354,19 @@ export namespace Prisma {
     OR?: PatientWhereInput[]
     NOT?: PatientWhereInput | PatientWhereInput[]
     id?: StringFilter<"Patient"> | string
-    birthDate?: DateTimeFilter<"Patient"> | Date | string
+    birthdate?: DateTimeFilter<"Patient"> | Date | string
+    gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    doctors?: DoctorListRelationFilter
     consultations?: ConsultationListRelationFilter
   }
 
   export type PatientOrderByWithRelationInput = {
     id?: SortOrder
-    birthDate?: SortOrder
+    birthdate?: SortOrder
+    gender?: SortOrder
     user?: UserOrderByWithRelationInput
+    doctors?: DoctorOrderByRelationAggregateInput
     consultations?: ConsultationOrderByRelationAggregateInput
   }
 
@@ -12254,14 +12375,17 @@ export namespace Prisma {
     AND?: PatientWhereInput | PatientWhereInput[]
     OR?: PatientWhereInput[]
     NOT?: PatientWhereInput | PatientWhereInput[]
-    birthDate?: DateTimeFilter<"Patient"> | Date | string
+    birthdate?: DateTimeFilter<"Patient"> | Date | string
+    gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    doctors?: DoctorListRelationFilter
     consultations?: ConsultationListRelationFilter
   }, "id">
 
   export type PatientOrderByWithAggregationInput = {
     id?: SortOrder
-    birthDate?: SortOrder
+    birthdate?: SortOrder
+    gender?: SortOrder
     _count?: PatientCountOrderByAggregateInput
     _max?: PatientMaxOrderByAggregateInput
     _min?: PatientMinOrderByAggregateInput
@@ -12272,7 +12396,8 @@ export namespace Prisma {
     OR?: PatientScalarWhereWithAggregatesInput[]
     NOT?: PatientScalarWhereWithAggregatesInput | PatientScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Patient"> | string
-    birthDate?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
+    birthdate?: DateTimeWithAggregatesFilter<"Patient"> | Date | string
+    gender?: EnumGenderWithAggregatesFilter<"Patient"> | $Enums.Gender
   }
 
   export type MedicamentWhereInput = {
@@ -12767,6 +12892,7 @@ export namespace Prisma {
     specialty: string
     licenseNumber: string
     user?: UserCreateNestedOneWithoutDoctorInput
+    patients?: PatientCreateNestedManyWithoutDoctorsInput
     consultations?: ConsultationCreateNestedManyWithoutDoctorInput
   }
 
@@ -12774,6 +12900,7 @@ export namespace Prisma {
     id: string
     specialty: string
     licenseNumber: string
+    patients?: PatientUncheckedCreateNestedManyWithoutDoctorsInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutDoctorInput
   }
 
@@ -12781,6 +12908,7 @@ export namespace Prisma {
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneWithoutDoctorNestedInput
+    patients?: PatientUpdateManyWithoutDoctorsNestedInput
     consultations?: ConsultationUpdateManyWithoutDoctorNestedInput
   }
 
@@ -12788,6 +12916,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
+    patients?: PatientUncheckedUpdateManyWithoutDoctorsNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutDoctorNestedInput
   }
 
@@ -12809,41 +12938,52 @@ export namespace Prisma {
   }
 
   export type PatientCreateInput = {
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
     user?: UserCreateNestedOneWithoutPatientInput
+    doctors?: DoctorCreateNestedManyWithoutPatientsInput
     consultations?: ConsultationCreateNestedManyWithoutPatientInput
   }
 
   export type PatientUncheckedCreateInput = {
     id: string
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
+    doctors?: DoctorUncheckedCreateNestedManyWithoutPatientsInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutPatientInput
   }
 
   export type PatientUpdateInput = {
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     user?: UserUpdateOneWithoutPatientNestedInput
+    doctors?: DoctorUpdateManyWithoutPatientsNestedInput
     consultations?: ConsultationUpdateManyWithoutPatientNestedInput
   }
 
   export type PatientUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    doctors?: DoctorUncheckedUpdateManyWithoutPatientsNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutPatientNestedInput
   }
 
   export type PatientCreateManyInput = {
     id: string
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
   }
 
   export type PatientUpdateManyMutationInput = {
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
   }
 
   export type PatientUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
   }
 
   export type MedicamentCreateInput = {
@@ -13410,10 +13550,20 @@ export namespace Prisma {
     isNot?: UserWhereInput | null
   }
 
+  export type PatientListRelationFilter = {
+    every?: PatientWhereInput
+    some?: PatientWhereInput
+    none?: PatientWhereInput
+  }
+
   export type ConsultationListRelationFilter = {
     every?: ConsultationWhereInput
     some?: ConsultationWhereInput
     none?: ConsultationWhereInput
+  }
+
+  export type PatientOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type ConsultationOrderByRelationAggregateInput = {
@@ -13438,19 +13588,49 @@ export namespace Prisma {
     licenseNumber?: SortOrder
   }
 
+  export type EnumGenderFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
+  }
+
+  export type DoctorListRelationFilter = {
+    every?: DoctorWhereInput
+    some?: DoctorWhereInput
+    none?: DoctorWhereInput
+  }
+
+  export type DoctorOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type PatientCountOrderByAggregateInput = {
     id?: SortOrder
-    birthDate?: SortOrder
+    birthdate?: SortOrder
+    gender?: SortOrder
   }
 
   export type PatientMaxOrderByAggregateInput = {
     id?: SortOrder
-    birthDate?: SortOrder
+    birthdate?: SortOrder
+    gender?: SortOrder
   }
 
   export type PatientMinOrderByAggregateInput = {
     id?: SortOrder
-    birthDate?: SortOrder
+    birthdate?: SortOrder
+    gender?: SortOrder
+  }
+
+  export type EnumGenderWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderWithAggregatesFilter<$PrismaModel> | $Enums.Gender
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumGenderFilter<$PrismaModel>
+    _max?: NestedEnumGenderFilter<$PrismaModel>
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -13869,11 +14049,23 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type PatientCreateNestedManyWithoutDoctorsInput = {
+    create?: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput> | PatientCreateWithoutDoctorsInput[] | PatientUncheckedCreateWithoutDoctorsInput[]
+    connectOrCreate?: PatientCreateOrConnectWithoutDoctorsInput | PatientCreateOrConnectWithoutDoctorsInput[]
+    connect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+  }
+
   export type ConsultationCreateNestedManyWithoutDoctorInput = {
     create?: XOR<ConsultationCreateWithoutDoctorInput, ConsultationUncheckedCreateWithoutDoctorInput> | ConsultationCreateWithoutDoctorInput[] | ConsultationUncheckedCreateWithoutDoctorInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutDoctorInput | ConsultationCreateOrConnectWithoutDoctorInput[]
     createMany?: ConsultationCreateManyDoctorInputEnvelope
     connect?: ConsultationWhereUniqueInput | ConsultationWhereUniqueInput[]
+  }
+
+  export type PatientUncheckedCreateNestedManyWithoutDoctorsInput = {
+    create?: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput> | PatientCreateWithoutDoctorsInput[] | PatientUncheckedCreateWithoutDoctorsInput[]
+    connectOrCreate?: PatientCreateOrConnectWithoutDoctorsInput | PatientCreateOrConnectWithoutDoctorsInput[]
+    connect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
   }
 
   export type ConsultationUncheckedCreateNestedManyWithoutDoctorInput = {
@@ -13893,6 +14085,19 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDoctorInput, UserUpdateWithoutDoctorInput>, UserUncheckedUpdateWithoutDoctorInput>
   }
 
+  export type PatientUpdateManyWithoutDoctorsNestedInput = {
+    create?: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput> | PatientCreateWithoutDoctorsInput[] | PatientUncheckedCreateWithoutDoctorsInput[]
+    connectOrCreate?: PatientCreateOrConnectWithoutDoctorsInput | PatientCreateOrConnectWithoutDoctorsInput[]
+    upsert?: PatientUpsertWithWhereUniqueWithoutDoctorsInput | PatientUpsertWithWhereUniqueWithoutDoctorsInput[]
+    set?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    disconnect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    delete?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    connect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    update?: PatientUpdateWithWhereUniqueWithoutDoctorsInput | PatientUpdateWithWhereUniqueWithoutDoctorsInput[]
+    updateMany?: PatientUpdateManyWithWhereWithoutDoctorsInput | PatientUpdateManyWithWhereWithoutDoctorsInput[]
+    deleteMany?: PatientScalarWhereInput | PatientScalarWhereInput[]
+  }
+
   export type ConsultationUpdateManyWithoutDoctorNestedInput = {
     create?: XOR<ConsultationCreateWithoutDoctorInput, ConsultationUncheckedCreateWithoutDoctorInput> | ConsultationCreateWithoutDoctorInput[] | ConsultationUncheckedCreateWithoutDoctorInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutDoctorInput | ConsultationCreateOrConnectWithoutDoctorInput[]
@@ -13905,6 +14110,19 @@ export namespace Prisma {
     update?: ConsultationUpdateWithWhereUniqueWithoutDoctorInput | ConsultationUpdateWithWhereUniqueWithoutDoctorInput[]
     updateMany?: ConsultationUpdateManyWithWhereWithoutDoctorInput | ConsultationUpdateManyWithWhereWithoutDoctorInput[]
     deleteMany?: ConsultationScalarWhereInput | ConsultationScalarWhereInput[]
+  }
+
+  export type PatientUncheckedUpdateManyWithoutDoctorsNestedInput = {
+    create?: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput> | PatientCreateWithoutDoctorsInput[] | PatientUncheckedCreateWithoutDoctorsInput[]
+    connectOrCreate?: PatientCreateOrConnectWithoutDoctorsInput | PatientCreateOrConnectWithoutDoctorsInput[]
+    upsert?: PatientUpsertWithWhereUniqueWithoutDoctorsInput | PatientUpsertWithWhereUniqueWithoutDoctorsInput[]
+    set?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    disconnect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    delete?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    connect?: PatientWhereUniqueInput | PatientWhereUniqueInput[]
+    update?: PatientUpdateWithWhereUniqueWithoutDoctorsInput | PatientUpdateWithWhereUniqueWithoutDoctorsInput[]
+    updateMany?: PatientUpdateManyWithWhereWithoutDoctorsInput | PatientUpdateManyWithWhereWithoutDoctorsInput[]
+    deleteMany?: PatientScalarWhereInput | PatientScalarWhereInput[]
   }
 
   export type ConsultationUncheckedUpdateManyWithoutDoctorNestedInput = {
@@ -13927,6 +14145,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type DoctorCreateNestedManyWithoutPatientsInput = {
+    create?: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput> | DoctorCreateWithoutPatientsInput[] | DoctorUncheckedCreateWithoutPatientsInput[]
+    connectOrCreate?: DoctorCreateOrConnectWithoutPatientsInput | DoctorCreateOrConnectWithoutPatientsInput[]
+    connect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+  }
+
   export type ConsultationCreateNestedManyWithoutPatientInput = {
     create?: XOR<ConsultationCreateWithoutPatientInput, ConsultationUncheckedCreateWithoutPatientInput> | ConsultationCreateWithoutPatientInput[] | ConsultationUncheckedCreateWithoutPatientInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutPatientInput | ConsultationCreateOrConnectWithoutPatientInput[]
@@ -13934,11 +14158,21 @@ export namespace Prisma {
     connect?: ConsultationWhereUniqueInput | ConsultationWhereUniqueInput[]
   }
 
+  export type DoctorUncheckedCreateNestedManyWithoutPatientsInput = {
+    create?: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput> | DoctorCreateWithoutPatientsInput[] | DoctorUncheckedCreateWithoutPatientsInput[]
+    connectOrCreate?: DoctorCreateOrConnectWithoutPatientsInput | DoctorCreateOrConnectWithoutPatientsInput[]
+    connect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+  }
+
   export type ConsultationUncheckedCreateNestedManyWithoutPatientInput = {
     create?: XOR<ConsultationCreateWithoutPatientInput, ConsultationUncheckedCreateWithoutPatientInput> | ConsultationCreateWithoutPatientInput[] | ConsultationUncheckedCreateWithoutPatientInput[]
     connectOrCreate?: ConsultationCreateOrConnectWithoutPatientInput | ConsultationCreateOrConnectWithoutPatientInput[]
     createMany?: ConsultationCreateManyPatientInputEnvelope
     connect?: ConsultationWhereUniqueInput | ConsultationWhereUniqueInput[]
+  }
+
+  export type EnumGenderFieldUpdateOperationsInput = {
+    set?: $Enums.Gender
   }
 
   export type UserUpdateOneWithoutPatientNestedInput = {
@@ -13949,6 +14183,19 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPatientInput, UserUpdateWithoutPatientInput>, UserUncheckedUpdateWithoutPatientInput>
+  }
+
+  export type DoctorUpdateManyWithoutPatientsNestedInput = {
+    create?: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput> | DoctorCreateWithoutPatientsInput[] | DoctorUncheckedCreateWithoutPatientsInput[]
+    connectOrCreate?: DoctorCreateOrConnectWithoutPatientsInput | DoctorCreateOrConnectWithoutPatientsInput[]
+    upsert?: DoctorUpsertWithWhereUniqueWithoutPatientsInput | DoctorUpsertWithWhereUniqueWithoutPatientsInput[]
+    set?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    disconnect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    delete?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    connect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    update?: DoctorUpdateWithWhereUniqueWithoutPatientsInput | DoctorUpdateWithWhereUniqueWithoutPatientsInput[]
+    updateMany?: DoctorUpdateManyWithWhereWithoutPatientsInput | DoctorUpdateManyWithWhereWithoutPatientsInput[]
+    deleteMany?: DoctorScalarWhereInput | DoctorScalarWhereInput[]
   }
 
   export type ConsultationUpdateManyWithoutPatientNestedInput = {
@@ -13963,6 +14210,19 @@ export namespace Prisma {
     update?: ConsultationUpdateWithWhereUniqueWithoutPatientInput | ConsultationUpdateWithWhereUniqueWithoutPatientInput[]
     updateMany?: ConsultationUpdateManyWithWhereWithoutPatientInput | ConsultationUpdateManyWithWhereWithoutPatientInput[]
     deleteMany?: ConsultationScalarWhereInput | ConsultationScalarWhereInput[]
+  }
+
+  export type DoctorUncheckedUpdateManyWithoutPatientsNestedInput = {
+    create?: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput> | DoctorCreateWithoutPatientsInput[] | DoctorUncheckedCreateWithoutPatientsInput[]
+    connectOrCreate?: DoctorCreateOrConnectWithoutPatientsInput | DoctorCreateOrConnectWithoutPatientsInput[]
+    upsert?: DoctorUpsertWithWhereUniqueWithoutPatientsInput | DoctorUpsertWithWhereUniqueWithoutPatientsInput[]
+    set?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    disconnect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    delete?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    connect?: DoctorWhereUniqueInput | DoctorWhereUniqueInput[]
+    update?: DoctorUpdateWithWhereUniqueWithoutPatientsInput | DoctorUpdateWithWhereUniqueWithoutPatientsInput[]
+    updateMany?: DoctorUpdateManyWithWhereWithoutPatientsInput | DoctorUpdateManyWithWhereWithoutPatientsInput[]
+    deleteMany?: DoctorScalarWhereInput | DoctorScalarWhereInput[]
   }
 
   export type ConsultationUncheckedUpdateManyWithoutPatientNestedInput = {
@@ -14539,6 +14799,23 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedEnumGenderFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
+  }
+
+  export type NestedEnumGenderWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderWithAggregatesFilter<$PrismaModel> | $Enums.Gender
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumGenderFilter<$PrismaModel>
+    _max?: NestedEnumGenderFilter<$PrismaModel>
+  }
+
   export type NestedEnumUnitFilter<$PrismaModel = never> = {
     equals?: $Enums.Unit | EnumUnitFieldRefInput<$PrismaModel>
     in?: $Enums.Unit[] | ListEnumUnitFieldRefInput<$PrismaModel>
@@ -14616,12 +14893,14 @@ export namespace Prisma {
   export type DoctorCreateWithoutUserInput = {
     specialty: string
     licenseNumber: string
+    patients?: PatientCreateNestedManyWithoutDoctorsInput
     consultations?: ConsultationCreateNestedManyWithoutDoctorInput
   }
 
   export type DoctorUncheckedCreateWithoutUserInput = {
     specialty: string
     licenseNumber: string
+    patients?: PatientUncheckedCreateNestedManyWithoutDoctorsInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutDoctorInput
   }
 
@@ -14631,12 +14910,16 @@ export namespace Prisma {
   }
 
   export type PatientCreateWithoutUserInput = {
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
+    doctors?: DoctorCreateNestedManyWithoutPatientsInput
     consultations?: ConsultationCreateNestedManyWithoutPatientInput
   }
 
   export type PatientUncheckedCreateWithoutUserInput = {
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
+    doctors?: DoctorUncheckedCreateNestedManyWithoutPatientsInput
     consultations?: ConsultationUncheckedCreateNestedManyWithoutPatientInput
   }
 
@@ -14659,12 +14942,14 @@ export namespace Prisma {
   export type DoctorUpdateWithoutUserInput = {
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
+    patients?: PatientUpdateManyWithoutDoctorsNestedInput
     consultations?: ConsultationUpdateManyWithoutDoctorNestedInput
   }
 
   export type DoctorUncheckedUpdateWithoutUserInput = {
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
+    patients?: PatientUncheckedUpdateManyWithoutDoctorsNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutDoctorNestedInput
   }
 
@@ -14680,12 +14965,16 @@ export namespace Prisma {
   }
 
   export type PatientUpdateWithoutUserInput = {
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    doctors?: DoctorUpdateManyWithoutPatientsNestedInput
     consultations?: ConsultationUpdateManyWithoutPatientNestedInput
   }
 
   export type PatientUncheckedUpdateWithoutUserInput = {
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    doctors?: DoctorUncheckedUpdateManyWithoutPatientsNestedInput
     consultations?: ConsultationUncheckedUpdateManyWithoutPatientNestedInput
   }
 
@@ -14716,6 +15005,25 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutDoctorInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutDoctorInput, UserUncheckedCreateWithoutDoctorInput>
+  }
+
+  export type PatientCreateWithoutDoctorsInput = {
+    birthdate: Date | string
+    gender: $Enums.Gender
+    user?: UserCreateNestedOneWithoutPatientInput
+    consultations?: ConsultationCreateNestedManyWithoutPatientInput
+  }
+
+  export type PatientUncheckedCreateWithoutDoctorsInput = {
+    id: string
+    birthdate: Date | string
+    gender: $Enums.Gender
+    consultations?: ConsultationUncheckedCreateNestedManyWithoutPatientInput
+  }
+
+  export type PatientCreateOrConnectWithoutDoctorsInput = {
+    where: PatientWhereUniqueInput
+    create: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput>
   }
 
   export type ConsultationCreateWithoutDoctorInput = {
@@ -14781,6 +15089,31 @@ export namespace Prisma {
     patient?: PatientUncheckedUpdateOneWithoutUserNestedInput
   }
 
+  export type PatientUpsertWithWhereUniqueWithoutDoctorsInput = {
+    where: PatientWhereUniqueInput
+    update: XOR<PatientUpdateWithoutDoctorsInput, PatientUncheckedUpdateWithoutDoctorsInput>
+    create: XOR<PatientCreateWithoutDoctorsInput, PatientUncheckedCreateWithoutDoctorsInput>
+  }
+
+  export type PatientUpdateWithWhereUniqueWithoutDoctorsInput = {
+    where: PatientWhereUniqueInput
+    data: XOR<PatientUpdateWithoutDoctorsInput, PatientUncheckedUpdateWithoutDoctorsInput>
+  }
+
+  export type PatientUpdateManyWithWhereWithoutDoctorsInput = {
+    where: PatientScalarWhereInput
+    data: XOR<PatientUpdateManyMutationInput, PatientUncheckedUpdateManyWithoutDoctorsInput>
+  }
+
+  export type PatientScalarWhereInput = {
+    AND?: PatientScalarWhereInput | PatientScalarWhereInput[]
+    OR?: PatientScalarWhereInput[]
+    NOT?: PatientScalarWhereInput | PatientScalarWhereInput[]
+    id?: StringFilter<"Patient"> | string
+    birthdate?: DateTimeFilter<"Patient"> | Date | string
+    gender?: EnumGenderFilter<"Patient"> | $Enums.Gender
+  }
+
   export type ConsultationUpsertWithWhereUniqueWithoutDoctorInput = {
     where: ConsultationWhereUniqueInput
     update: XOR<ConsultationUpdateWithoutDoctorInput, ConsultationUncheckedUpdateWithoutDoctorInput>
@@ -14836,6 +15169,25 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutPatientInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutPatientInput, UserUncheckedCreateWithoutPatientInput>
+  }
+
+  export type DoctorCreateWithoutPatientsInput = {
+    specialty: string
+    licenseNumber: string
+    user?: UserCreateNestedOneWithoutDoctorInput
+    consultations?: ConsultationCreateNestedManyWithoutDoctorInput
+  }
+
+  export type DoctorUncheckedCreateWithoutPatientsInput = {
+    id: string
+    specialty: string
+    licenseNumber: string
+    consultations?: ConsultationUncheckedCreateNestedManyWithoutDoctorInput
+  }
+
+  export type DoctorCreateOrConnectWithoutPatientsInput = {
+    where: DoctorWhereUniqueInput
+    create: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput>
   }
 
   export type ConsultationCreateWithoutPatientInput = {
@@ -14899,6 +15251,31 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     doctor?: DoctorUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type DoctorUpsertWithWhereUniqueWithoutPatientsInput = {
+    where: DoctorWhereUniqueInput
+    update: XOR<DoctorUpdateWithoutPatientsInput, DoctorUncheckedUpdateWithoutPatientsInput>
+    create: XOR<DoctorCreateWithoutPatientsInput, DoctorUncheckedCreateWithoutPatientsInput>
+  }
+
+  export type DoctorUpdateWithWhereUniqueWithoutPatientsInput = {
+    where: DoctorWhereUniqueInput
+    data: XOR<DoctorUpdateWithoutPatientsInput, DoctorUncheckedUpdateWithoutPatientsInput>
+  }
+
+  export type DoctorUpdateManyWithWhereWithoutPatientsInput = {
+    where: DoctorScalarWhereInput
+    data: XOR<DoctorUpdateManyMutationInput, DoctorUncheckedUpdateManyWithoutPatientsInput>
+  }
+
+  export type DoctorScalarWhereInput = {
+    AND?: DoctorScalarWhereInput | DoctorScalarWhereInput[]
+    OR?: DoctorScalarWhereInput[]
+    NOT?: DoctorScalarWhereInput | DoctorScalarWhereInput[]
+    id?: StringFilter<"Doctor"> | string
+    specialty?: StringFilter<"Doctor"> | string
+    licenseNumber?: StringFilter<"Doctor"> | string
   }
 
   export type ConsultationUpsertWithWhereUniqueWithoutPatientInput = {
@@ -15419,12 +15796,14 @@ export namespace Prisma {
     specialty: string
     licenseNumber: string
     user?: UserCreateNestedOneWithoutDoctorInput
+    patients?: PatientCreateNestedManyWithoutDoctorsInput
   }
 
   export type DoctorUncheckedCreateWithoutConsultationsInput = {
     id: string
     specialty: string
     licenseNumber: string
+    patients?: PatientUncheckedCreateNestedManyWithoutDoctorsInput
   }
 
   export type DoctorCreateOrConnectWithoutConsultationsInput = {
@@ -15433,13 +15812,17 @@ export namespace Prisma {
   }
 
   export type PatientCreateWithoutConsultationsInput = {
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
     user?: UserCreateNestedOneWithoutPatientInput
+    doctors?: DoctorCreateNestedManyWithoutPatientsInput
   }
 
   export type PatientUncheckedCreateWithoutConsultationsInput = {
     id: string
-    birthDate: Date | string
+    birthdate: Date | string
+    gender: $Enums.Gender
+    doctors?: DoctorUncheckedCreateNestedManyWithoutPatientsInput
   }
 
   export type PatientCreateOrConnectWithoutConsultationsInput = {
@@ -15478,12 +15861,14 @@ export namespace Prisma {
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneWithoutDoctorNestedInput
+    patients?: PatientUpdateManyWithoutDoctorsNestedInput
   }
 
   export type DoctorUncheckedUpdateWithoutConsultationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     specialty?: StringFieldUpdateOperationsInput | string
     licenseNumber?: StringFieldUpdateOperationsInput | string
+    patients?: PatientUncheckedUpdateManyWithoutDoctorsNestedInput
   }
 
   export type PatientUpsertWithoutConsultationsInput = {
@@ -15498,13 +15883,17 @@ export namespace Prisma {
   }
 
   export type PatientUpdateWithoutConsultationsInput = {
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     user?: UserUpdateOneWithoutPatientNestedInput
+    doctors?: DoctorUpdateManyWithoutPatientsNestedInput
   }
 
   export type PatientUncheckedUpdateWithoutConsultationsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    birthDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    doctors?: DoctorUncheckedUpdateManyWithoutPatientsNestedInput
   }
 
   export type ReminderDataCreateWithoutReminderInput = {
@@ -15661,6 +16050,26 @@ export namespace Prisma {
     diseases?: ConsultationCreatediseasesInput | string[]
   }
 
+  export type PatientUpdateWithoutDoctorsInput = {
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    user?: UserUpdateOneWithoutPatientNestedInput
+    consultations?: ConsultationUpdateManyWithoutPatientNestedInput
+  }
+
+  export type PatientUncheckedUpdateWithoutDoctorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    consultations?: ConsultationUncheckedUpdateManyWithoutPatientNestedInput
+  }
+
+  export type PatientUncheckedUpdateManyWithoutDoctorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    birthdate?: DateTimeFieldUpdateOperationsInput | Date | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+  }
+
   export type ConsultationUpdateWithoutDoctorInput = {
     id?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15693,6 +16102,26 @@ export namespace Prisma {
     date: Date | string
     symptoms?: ConsultationCreatesymptomsInput | string[]
     diseases?: ConsultationCreatediseasesInput | string[]
+  }
+
+  export type DoctorUpdateWithoutPatientsInput = {
+    specialty?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    user?: UserUpdateOneWithoutDoctorNestedInput
+    consultations?: ConsultationUpdateManyWithoutDoctorNestedInput
+  }
+
+  export type DoctorUncheckedUpdateWithoutPatientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    specialty?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    consultations?: ConsultationUncheckedUpdateManyWithoutDoctorNestedInput
+  }
+
+  export type DoctorUncheckedUpdateManyWithoutPatientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    specialty?: StringFieldUpdateOperationsInput | string
+    licenseNumber?: StringFieldUpdateOperationsInput | string
   }
 
   export type ConsultationUpdateWithoutPatientInput = {
